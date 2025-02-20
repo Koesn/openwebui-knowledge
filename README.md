@@ -15,12 +15,12 @@ FULL_PATH : a file or a folder contains files
 ID        : knowledge id from "http://your-open-webui-instance:port/workspace/knowledge/id"
 
 ```
-To add/remove a file, use this format:
+To add/remove a knowledge by a local filename, use this format:
 ```
 --add ~/knowledge/my-knowledge-file.txt --id ID
 --remove ~/knowledge/my-knowledge-file.txt --id ID
 ```
-To add/remove files in a folder, use this format:
+To add/remove knowledges by list of files in from a folder, use this format:
 ```
 --add /path-to-knowledges/my-knowledge-folder --id ID
 --remove /path-to-knowledges/my-knowledge-folder --id ID
