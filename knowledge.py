@@ -4,6 +4,7 @@ import os
 import requests
 import argparse
 import json
+import mimetypes
 from pathlib import Path
 from datetime import datetime
 
@@ -15,7 +16,7 @@ except ImportError:
 
 # Konfigurasi
 WEBUI_URL = os.getenv("WEBUI_URL", "https://your-open-webui-url.com") 
-TOKEN = os.getenv("TOKEN", "your-open-webui-account-api-key-JWT-token")
+TOKEN = os.getenv("TOKEN", "your-open-webui-account-api-key-JWT-token-or-api-key")
 LOG_FILE = "record.json"
 
 # Fungsi untuk menulis log ke file JSON
@@ -129,9 +130,29 @@ def upload_file(file_path):
         'Authorization': f'Bearer {TOKEN}',
         'Accept': 'application/json'
     }
-    files = {'file': open(file_path, 'rb')}
-    response = requests.post(url, headers=headers, files=files)
-    return response.json()
+    
+    # Dapatkan nama file dan tipe mime
+    filename = os.path.basename(file_path)
+    mime_type, _ = mimetypes.guess_type(file_path)
+    if mime_type is None:
+        mime_type = 'application/octet-stream'  # fallback jika tidak diketahui
+    
+    try:
+        with open(file_path, 'rb') as file_obj:
+            session = create_session()
+            response = session.post(
+                url, 
+                headers=headers, 
+                files={'file': (filename, file_obj, mime_type)},
+                timeout=(CONNECT_TIMEOUT, READ_TIMEOUT)
+            )
+            return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Connection error when uploading file '{file_path}': {e}")
+        return {"error": str(e)}
+    except Exception as e:
+        print(f"Error uploading file '{file_path}': {e}")
+        return {"error": str(e)}
 
 # Fungsi untuk menambahkan file ke knowledge
 def add_file_to_knowledge(knowledge_id, file_id):
